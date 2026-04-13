@@ -8,14 +8,46 @@
   </head>
   <body>
     <div class="container">
-      <h1>Task List</h1>
+      <header class="header">
+        <h1 class="title">Task App</h1>
+        <p class="subtitle">Tracking of Daily Tasks</p>
+      </header>
 
-      <form id="task-form" class="task-form">
-        <input type="text" id="title" placeholder="Enter Task title" required />
-        <input type="text" id="none" placeholder="Enter note(Optional)" />
-      </form>
+      <section class="form-section">
+        <form id="task-form" class="task-form">
+          <div class="form-group">
+            <input
+              type="text"
+              id="title"
+              class="input-field"
+              placeholder="Enter Task title"
+              required
+            />
+          </div>
 
-      <ul id="task-list" class="task-list"></ul>
+          <div class="form-group">
+            <input
+              type="text"
+              id="note"
+              class="input-field"
+              placeholder="Add a note (Optional)"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Add Task</button>
+        </form>
+      </section>
+
+      <section class="tasks-section">
+        <div class="tasks-header">
+          <h2 class="tasks-title">Tasks</h2>
+          <span id="task-count" class="task-count">0 tasks</span>
+        </div>
+        <ul id="task-list" class="task-list"></ul>
+
+        <div id="empty-state" class="empty-state">
+          <p>No tasks yet. Create one to get started</p>
+        </div>
+      </section>
     </div>
     <script type="module" src="./main.ts"></script>
   </body>
