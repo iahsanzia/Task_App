@@ -1,77 +1,61 @@
 import type { Request, Response } from "express";
 import * as taskService from "../services/taskService.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
 
-export const createTask = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
+export const createTask = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
     const { title, note } = req.body;
+
+    if (!title) {
+      throw new ApiError(400, "Title is Required");
+    }
 
     const task = await taskService.createTask(title, note);
 
     res.status(201).json(task);
-  } catch (err) {
-    if (err instanceof Error) {
-      res.status(400).json({ error: err.message });
-    }
+  },
+);
+
+export const getTasks = asyncHandler(async (req: Request, res: Response) => {
+  const tasks = await taskService.getTasks();
+  res.status(200).json(tasks);
+});
+
+export const getTaskById = asyncHandler(async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+
+  if (isNaN(id)) {
+    throw new ApiError(400, "Invalid task ID");
   }
-};
 
-export const getTasks = async (req: Request, res: Response) => {
-  try {
-    const tasks = await taskService.getTasks();
-    res.status(200).json(tasks);
-  } catch (err) {
-    if (err instanceof Error) {
-      res.status(500).json({ error: err.message });
-    }
+  const task = await taskService.getTaskById(id);
+
+  res.status(200).json(task);
+});
+
+export const deleteTask = asyncHandler(async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  if (isNaN(id)) {
+    throw new ApiError(400, "Invalid task ID");
   }
-};
+  await taskService.deleteTask(id);
+  res.status(200).json({
+    message: "Task has been deleted",
+  });
+});
 
-export const getTaskById = async (req: Request, res: Response) => {
-  try {
-    const id = Number(req.params.id);
-
-    const task = await taskService.getTaskById(id);
-
-    res.status(200).json(task);
-  } catch (err) {
-    if (err instanceof Error) {
-      res.status(500).json({ error: err.message });
-    }
+export const updateTask = asyncHandler(async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  if (isNaN(id)) {
+    throw new ApiError(400, "Invalid task ID");
   }
-};
 
-export const deleteTask = async (req: Request, res: Response) => {
-  try {
-    const id = Number(req.params.id);
-
-    await taskService.deleteTask(id);
-    res.status(200).json({
-      message: "Task has been deleted",
-    });
-  } catch (err) {
-    if (err instanceof Error) {
-      res.status(500).json({ error: err.message });
-    }
-  }
-};
-
-export const updateTask = async (req: Request, res: Response) => {
-  try {
-    const id = Number(req.params.id);
-
-    const { title, note, completed } = req.body;
-    const updatedTask = await taskService.updateTask(id, {
-      title,
-      note,
-      completed,
-    });
-    res.json(updatedTask);
-  } catch (err) {
-    if (err instanceof Error) {
-      res.status(500).json({ error: err.message });
-    }
-  }
-};
+  const { title, note, completed } = req.body;
+  const updatedTask = await taskService.updateTask(id, {
+    title,
+    note,
+    completed,
+  });
+  res.json(updatedTask);
+});
