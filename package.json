@@ -5,6 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "dev:server": "tsx server.ts",
+    "build:front": "tsc -p tsconfig.frontend.json",
+    "watch:front": "tsc -p tsconfig.frontend.json --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -20,7 +23,9 @@
     "sqlite3": "^6.0.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "typescript": "^5.9.3",
     "tsx": "^4.21.0"
   }
 }
