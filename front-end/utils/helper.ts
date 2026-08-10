@@ -1,5 +1,5 @@
 export const handleResponse = async (res: Response) => {
-  const data = await res.json().catch(() => {});
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data.error || "Something went wrong");
   }
