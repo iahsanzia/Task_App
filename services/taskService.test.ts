@@ -1,8 +1,6 @@
 import { ApiError } from "../utils/ApiError.js";
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 
-// Explicit mock functions with proper types, so .mockResolvedValue(...)
-// doesn't collapse to `never`
 const mockCreateTask = jest.fn<(...args: any[]) => Promise<any>>();
 const mockGetAllTasks = jest.fn<(...args: any[]) => Promise<any>>();
 const mockGetTaskById = jest.fn<(...args: any[]) => Promise<any>>();
@@ -17,7 +15,6 @@ jest.unstable_mockModule("../repository/taskRepository.js", () => ({
   updateTask: mockUpdateTask,
 }));
 
-// Dynamic imports AFTER the mock is registered
 const service = await import("./taskService.js");
 const repo = await import("../repository/taskRepository.js");
 

@@ -1,12 +1,23 @@
 import * as repo from "../repository/taskRepository.js";
 import { ApiError } from "../utils/ApiError.js";
 
-export const createTask = async (title: string, note: string) => {
+const getDefaultDate = (): string => {
+  const date = new Date();
+  date.setDate(date.getDate() + 1);
+  return date.toISOString();
+};
+
+export const createTask = async (
+  title: string,
+  note: string,
+  dueDate?: string | null,
+) => {
   if (!title) {
     throw new ApiError(404, "Title is Required");
   }
 
-  return await repo.createTask({ title, note });
+  const taskDueDate = dueDate ? dueDate : getDefaultDate();
+  return await repo.createTask({ title, note, dueDate: taskDueDate });
 };
 
 export const getTasks = async () => {
@@ -38,6 +49,7 @@ export const updateTask = async (
     title?: string;
     note?: string | null;
     completed?: null;
+    dueDate?: string | null;
   },
 ) => {
   const allowedUpdates: any = {};
@@ -54,6 +66,10 @@ export const updateTask = async (
   }
   if (data.note !== undefined) {
     allowedUpdates.note = data.note;
+  }
+
+  if (data.dueDate !== undefined) {
+    allowedUpdates.dueDate = data.dueDate ? data.dueDate : getDefaultDate();
   }
 
   const updatedTask = await repo.updateTask(id, allowedUpdates);
