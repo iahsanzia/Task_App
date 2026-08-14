@@ -39,8 +39,17 @@ describe("taskController", () => {
 
   describe("createTask", () => {
     it("should create a task and return 201", async () => {
-      req.body = { title: "Hello", note: "world" };
-      const created = { id: 1, title: "Hello", note: "world" };
+      req.body = {
+        title: "Hello",
+        note: "world",
+        dueDate: "2026-01-01T00:00:00.000Z",
+      };
+      const created = {
+        id: 1,
+        title: "Hello",
+        note: "world",
+        dueDate: "2026-01-01T00:00:00.000Z",
+      };
       mockCreateTask.mockResolvedValue(created);
 
       await controller.createTask(
@@ -49,7 +58,11 @@ describe("taskController", () => {
         next as unknown as NextFunction,
       );
 
-      expect(mockCreateTask).toHaveBeenCalledWith("Hello", "world");
+      expect(mockCreateTask).toHaveBeenCalledWith(
+        "Hello",
+        "world",
+        "2026-01-01T00:00:00.000Z",
+      );
       expect(statusMock).toHaveBeenCalledWith(201);
       expect(jsonMock).toHaveBeenCalledWith(created);
       expect(next).not.toHaveBeenCalled();
@@ -167,8 +180,19 @@ describe("taskController", () => {
   describe("updateTask", () => {
     it("should update a task and return the result", async () => {
       req.params = { id: "1" };
-      req.body = { title: "Updated", note: "new", completed: true };
-      const updated = { id: 1, title: "Updated", note: "new", completed: true };
+      req.body = {
+        title: "Updated",
+        note: "new",
+        completed: true,
+        dueDate: "2026-02-01T00:00:00.000Z",
+      };
+      const updated = {
+        id: 1,
+        title: "Updated",
+        note: "new",
+        completed: true,
+        dueDate: "2026-02-01T00:00:00.000Z",
+      };
       mockUpdateTask.mockResolvedValue(updated);
 
       await controller.updateTask(
@@ -181,6 +205,7 @@ describe("taskController", () => {
         title: "Updated",
         note: "new",
         completed: true,
+        dueDate: "2026-02-01T00:00:00.000Z",
       });
       expect(jsonMock).toHaveBeenCalledWith(updated);
     });

@@ -1,8 +1,6 @@
 import { ApiError } from "../utils/ApiError.js";
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 
-// Explicit mock functions with proper types, so .mockResolvedValue(...)
-// doesn't collapse to `never`
 const mockCreateTask = jest.fn<(...args: any[]) => Promise<any>>();
 const mockGetAllTasks = jest.fn<(...args: any[]) => Promise<any>>();
 const mockGetTaskById = jest.fn<(...args: any[]) => Promise<any>>();
@@ -17,7 +15,6 @@ jest.unstable_mockModule("../repository/taskRepository.js", () => ({
   updateTask: mockUpdateTask,
 }));
 
-// Dynamic imports AFTER the mock is registered
 const service = await import("./taskService.js");
 const repo = await import("../repository/taskRepository.js");
 
@@ -27,22 +24,55 @@ describe("taskService", () => {
   });
 
   describe("createTask", () => {
-    it("should create a task when title is provided", async () => {
+    it("should create a task when title and dueDate is provided", async () => {
       const created = {
         id: 1,
         title: "Hello",
         note: "world",
+        dueDate: "2026-01-01T00:00:00.000Z",
         completed: false,
       };
       mockCreateTask.mockResolvedValue(created);
 
-      const result = await service.createTask("Hello", "world");
+      const result = await service.createTask(
+        "Hello",
+        "world",
+        "2026-01-01T00:00:00.000Z",
+      );
 
       expect(repo.createTask).toHaveBeenCalledWith({
         title: "Hello",
         note: "world",
+        dueDate: "2026-01-01T00:00:00.000Z",
       });
       expect(result).toEqual(created);
+    });
+
+    it("should default dueDate to 1Day from now when not provided", async () => {
+      const created = {
+        id: 1,
+        title: "Hello",
+        note: "world",
+      };
+      mockCreateTask.mockResolvedValue(created);
+      const before = Date.now();
+      await service.createTask("Hello", "world");
+      const after = Date.now();
+
+      expect(repo.createTask).toHaveBeenCalledTimes(1);
+      const callArguments = mockCreateTask.mock.calls[0]![0] as {
+        title: string;
+        note: string;
+        dueDate: string;
+      };
+
+      expect(callArguments.title).toBe("Hello");
+      expect(callArguments.note).toBe("world");
+
+      const dueDate = new Date(callArguments.dueDate!).getTime();
+      const oneDay = 24 * 60 * 60 * 1000;
+      expect(dueDate).toBeGreaterThanOrEqual(before + oneDay - 1000);
+      expect(dueDate).toBeLessThanOrEqual(after + oneDay + 1000);
     });
 
     it("should throw ApiError when title is empty", async () => {
