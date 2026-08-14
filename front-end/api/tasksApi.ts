@@ -14,10 +14,11 @@ export const getTaskById = async (id: number): Promise<Task> => {
 export const createTask = async (
   title: string,
   note?: string,
+  dueDate?: string,
 ): Promise<Task> => {
   return fetchJSON(BASE_URL, {
     method: "POST",
-    body: JSON.stringify({ title, note }),
+    body: JSON.stringify({ title, note, dueDate }),
   });
 };
 
@@ -27,6 +28,7 @@ export const updateTask = async (
     title: string;
     note: string | null;
     completed: boolean;
+    dueDate: string | null;
   }>,
 ): Promise<Task> => {
   return fetchJSON(`${BASE_URL}/${id}`, {
