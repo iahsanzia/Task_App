@@ -9,6 +9,7 @@ import type { Task } from "./types/taskTypes.js";
 const form = document.getElementById("task-form") as HTMLFormElement;
 const titleInput = document.getElementById("title") as HTMLInputElement;
 const noteInput = document.getElementById("note") as HTMLInputElement;
+const dueDateInput = document.getElementById("dueDate") as HTMLInputElement;
 
 const list = document.getElementById("task-list") as HTMLUListElement;
 const taskCount = document.getElementById("task-count") as HTMLElement;
@@ -21,6 +22,17 @@ const loadTasks = async () => {
   } catch (err: any) {
     alert(err.message);
   }
+};
+
+const formatDueDate = (dueDate: string | null): string => {
+  if (!dueDate) return "";
+  const date = new Date(dueDate);
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 };
 
 const renderTasks = (tasks: Task[]) => {
@@ -50,6 +62,11 @@ const renderTasks = (tasks: Task[]) => {
       <div class="task-content">
         <div class="task-title">${task.title}</div>
         ${
+          task.dueDate
+            ? `<div class="task-due-date">Due: ${formatDueDate(task.dueDate)}</div>`
+            : ""
+        }
+        ${
           task.note
             ? `<div class="task-note hidden" id="note-${task.id}">${task.note}</div>`
             : ""
@@ -78,6 +95,7 @@ form.addEventListener("submit", async (e) => {
 
   const title = titleInput.value.trim();
   const note = noteInput.value.trim();
+  const dueDate = dueDateInput.value ? dueDateInput.value : null;
 
   if (!title) return;
 
@@ -86,6 +104,7 @@ form.addEventListener("submit", async (e) => {
 
     titleInput.value = "";
     noteInput.value = "";
+    dueDateInput.value = "";
 
     loadTasks();
   } catch (err: any) {
@@ -119,12 +138,14 @@ list.addEventListener("click", async (e) => {
     if (target.classList.contains("edit")) {
       const newTitle = prompt("Enter new title:");
       const newNote = prompt("Enter new note:");
+      const newDueDate = prompt("Enter new due date (YYYY-MM-DD):");
 
-      if (newTitle === null && newNote === null) return;
+      if (newTitle === null && newNote === null && newDueDate === null) return;
 
       const updates: Partial<{
         title: string;
         note: string | null;
+        dueDate: string | null;
       }> = {};
 
       if (newTitle !== null) {
@@ -134,6 +155,10 @@ list.addEventListener("click", async (e) => {
 
       if (newNote !== null) {
         updates.note = newNote.trim() === "" ? null : newNote.trim();
+      }
+
+      if (newDueDate !== null) {
+        updates.dueDate = newDueDate.trim() === "" ? null : newDueDate.trim();
       }
 
       if (Object.keys(updates).length === 0) return;
