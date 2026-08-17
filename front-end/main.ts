@@ -25,6 +25,7 @@ const loadTasks = async () => {
 };
 
 const formatDueDate = (dueDate: string | null): string => {
+  //"2026-01-01T00:00:00.000Z"
   if (!dueDate) return "";
   const date = new Date(dueDate);
   if (isNaN(date.getTime())) return "";
@@ -33,6 +34,50 @@ const formatDueDate = (dueDate: string | null): string => {
     month: "short",
     day: "numeric",
   });
+};
+
+const isValidInputDate = (value: string): boolean => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+
+  if (month < 1 || month > 12) return false;
+  if (day < 1 || day > 31) return false;
+
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return false;
+  }
+
+  // need to check if the date is in the past
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+  if (date.getTime() < today.getTime()) return false;
+  return true;
+};
+
+// need to update the functionality of prompt
+
+const promptForDate = (message: string): string | null => {
+  let input = prompt(message);
+
+  if (input === null) return null;
+
+  while (input.trim() !== "" && !isValidInputDate(input.trim())) {
+    input = prompt(
+      "Invalid date format or past date. Enter valid Date (YYYY-MM-DD) or leave blank to cancel:",
+    );
+    if (input === null) return null;
+  }
+  return input.trim() === "" ? null : input.trim();
 };
 
 const renderTasks = (tasks: Task[]) => {
@@ -100,7 +145,7 @@ form.addEventListener("submit", async (e) => {
   if (!title) return;
 
   try {
-    await createTask(title, note || undefined);
+    await createTask(title, note || undefined, dueDate || undefined);
 
     titleInput.value = "";
     noteInput.value = "";
@@ -138,7 +183,7 @@ list.addEventListener("click", async (e) => {
     if (target.classList.contains("edit")) {
       const newTitle = prompt("Enter new title:");
       const newNote = prompt("Enter new note:");
-      const newDueDate = prompt("Enter new due date (YYYY-MM-DD):");
+      const newDueDate = promptForDate("Enter new due date (YYYY-MM-DD)");
 
       if (newTitle === null && newNote === null && newDueDate === null) return;
 
