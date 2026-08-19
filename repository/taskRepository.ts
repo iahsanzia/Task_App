@@ -2,8 +2,8 @@ import Task from "../models/Task.js";
 
 export const createTask = async (data: {
   title: string;
-  note?: string;
-  dueDate?: string;
+  note?: string | null;
+  dueDate?: Date | null;
 }): Promise<Task> => {
   return await Task.create(data);
 };
@@ -31,7 +31,7 @@ export const updateTask = async (
     title: string;
     note: string | null;
     completed: boolean;
-    dueDate: string | null;
+    dueDate: Date | null;
   }>,
 ) => {
   const task = await Task.findByPk(id);

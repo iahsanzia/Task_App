@@ -6,7 +6,7 @@ class Task extends Model {
   declare title: string;
   declare completed: boolean;
   declare note: string | null;
-  declare dueDate: string | null;
+  declare dueDate: Date | null;
 }
 
 Task.init(
@@ -33,7 +33,7 @@ Task.init(
       defaultValue: null,
     },
     dueDate: {
-      type: DataTypes.TEXT,
+      type: DataTypes.DATE,
       allowNull: true,
       defaultValue: null,
     },
