@@ -42,13 +42,13 @@ describe("taskController", () => {
       req.body = {
         title: "Hello",
         note: "world",
-        dueDate: "2026-01-01T00:00:00.000Z",
+        dueDate: "2026-01-01",
       };
       const created = {
         id: 1,
         title: "Hello",
         note: "world",
-        dueDate: "2026-01-01T00:00:00.000Z",
+        dueDate: "2026-01-01",
       };
       mockCreateTask.mockResolvedValue(created);
 
@@ -61,11 +61,36 @@ describe("taskController", () => {
       expect(mockCreateTask).toHaveBeenCalledWith(
         "Hello",
         "world",
-        "2026-01-01T00:00:00.000Z",
+        "2026-01-01",
       );
       expect(statusMock).toHaveBeenCalledWith(201);
       expect(jsonMock).toHaveBeenCalledWith(created);
       expect(next).not.toHaveBeenCalled();
+    });
+
+    it("should create a task without note and dueDate", async () => {
+      req.body = {
+        title: "Hello",
+      };
+      const created = {
+        id: 1,
+        title: "Hello",
+        note: null,
+        dueDate: null,
+      };
+      mockCreateTask.mockResolvedValue(created);
+      await controller.createTask(
+        req as Request,
+        res as Response,
+        next as unknown as NextFunction,
+      );
+      expect(mockCreateTask).toHaveBeenCalledWith(
+        "Hello",
+        undefined,
+        undefined,
+      );
+      expect(statusMock).toHaveBeenCalledWith(201);
+      expect(jsonMock).toHaveBeenCalledWith(created);
     });
 
     it("should call next with ApiError when title is missing", async () => {
@@ -184,14 +209,14 @@ describe("taskController", () => {
         title: "Updated",
         note: "new",
         completed: true,
-        dueDate: "2026-02-01T00:00:00.000Z",
+        dueDate: "2026-02-01",
       };
       const updated = {
         id: 1,
         title: "Updated",
         note: "new",
         completed: true,
-        dueDate: "2026-02-01T00:00:00.000Z",
+        dueDate: "2026-02-01",
       };
       mockUpdateTask.mockResolvedValue(updated);
 
@@ -205,7 +230,7 @@ describe("taskController", () => {
         title: "Updated",
         note: "new",
         completed: true,
-        dueDate: "2026-02-01T00:00:00.000Z",
+        dueDate: "2026-02-01",
       });
       expect(jsonMock).toHaveBeenCalledWith(updated);
     });

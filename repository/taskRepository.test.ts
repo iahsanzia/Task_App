@@ -6,6 +6,7 @@ type TaskAttrs = {
   title: string;
   completed: boolean;
   note?: string | null;
+  dueDate?: Date | null;
 };
 
 const mockCreate = jest.fn<(...args: any[]) => Promise<TaskAttrs>>();
@@ -35,7 +36,7 @@ describe("taskRepository", () => {
 
   describe("createTask", () => {
     it("should call Task.create with the provided data", async () => {
-      const input = { title: "Test", note: "optional" };
+      const input = { title: "Test", note: "optional", dueDate: null };
       const created = { id: 1, ...input, completed: false };
       mockCreate.mockResolvedValue(created);
 
@@ -49,7 +50,7 @@ describe("taskRepository", () => {
       const input = {
         title: "Test",
         note: "optional",
-        dueDate: "2026-01-01T00:00:00.000Z",
+        dueDate: "2026-01-01" as unknown as Date,
       };
       const created = { id: 1, ...input, completed: false };
       mockCreate.mockResolvedValue(created);
