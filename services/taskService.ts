@@ -1,19 +1,52 @@
 import * as repo from "../repository/taskRepository.js";
 import { ApiError } from "../utils/ApiError.js";
 
+const matchRegex = /^\d{4}-\d{2}-\d{2}$/;
+const dueDateValidation = (value: unknown): Date | null => {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+  if (typeof value !== "string") {
+    throw new ApiError(400, "Due date must be a string in YYYY-MM-DD format");
+  }
+  if (!matchRegex.test(value)) {
+    throw new ApiError(400, "Due date must be in YYYY-MM-DD format");
+  }
+  const [yearStr, monthStr, dayStr] = value.split("-");
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    throw new ApiError(400, "Due date must be a valid date ");
+  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+  if (date.getTime() < today.getTime()) {
+    throw new ApiError(400, "Due date cannot be in the past");
+  }
+  return date;
+};
+
 export const createTask = async (
   title: string,
   note?: string,
-  dueDate?: Date | null,
+  dueDate?: unknown,
 ) => {
   if (!title) {
     throw new ApiError(404, "Title is Required");
   }
-
+  const parsedDueDate = dueDateValidation(dueDate);
   return await repo.createTask({
     title,
     ...(note ? { note } : {}),
-    ...(dueDate ? { dueDate } : {}),
+    ...(parsedDueDate ? { dueDate: parsedDueDate } : {}),
   });
 };
 
@@ -46,7 +79,7 @@ export const updateTask = async (
     title?: string;
     note?: string | null;
     completed?: boolean | null;
-    dueDate?: Date | null;
+    dueDate?: unknown;
   },
 ) => {
   const allowedUpdates: any = {};
@@ -66,7 +99,7 @@ export const updateTask = async (
   }
 
   if (data.dueDate !== undefined) {
-    allowedUpdates.dueDate = data.dueDate ? data.dueDate : null;
+    allowedUpdates.dueDate = dueDateValidation(data.dueDate);
   }
 
   const updatedTask = await repo.updateTask(id, allowedUpdates);
