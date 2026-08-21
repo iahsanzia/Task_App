@@ -18,6 +18,14 @@ jest.unstable_mockModule("../repository/taskRepository.js", () => ({
 const service = await import("./taskService.js");
 const repo = await import("../repository/taskRepository.js");
 
+const DateP = "2020-01-01";
+const DateF = "2028-01-01";
+
+const dueDateValidation = (dueDate: unknown): Date => {
+  const [year, month, day] = (dueDate as string).split("-").map(Number);
+  return new Date(year!, month! - 1, day!);
+};
+
 describe("taskService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -29,50 +37,48 @@ describe("taskService", () => {
         id: 1,
         title: "Hello",
         note: "world",
-        dueDate: "2026-01-01T00:00:00.000Z",
+        dueDate: DateF,
         completed: false,
       };
       mockCreateTask.mockResolvedValue(created);
 
-      const result = await service.createTask(
-        "Hello",
-        "world",
-        "2026-01-01T00:00:00.000Z",
-      );
+      const result = await service.createTask("Hello", "world", DateF);
 
       expect(repo.createTask).toHaveBeenCalledWith({
         title: "Hello",
         note: "world",
-        dueDate: "2026-01-01T00:00:00.000Z",
+        dueDate: dueDateValidation(DateF),
       });
       expect(result).toEqual(created);
     });
 
-    it("should default dueDate to 1Day from now when not provided", async () => {
+    it("should create a task without dueDate", async () => {
       const created = {
         id: 1,
         title: "Hello",
         note: "world",
+        completed: false,
+        dueDate: null,
       };
       mockCreateTask.mockResolvedValue(created);
-      const before = Date.now();
-      await service.createTask("Hello", "world");
-      const after = Date.now();
+      const result = await service.createTask("Hello", "world");
 
-      expect(repo.createTask).toHaveBeenCalledTimes(1);
-      const callArguments = mockCreateTask.mock.calls[0]![0] as {
-        title: string;
-        note: string;
-        dueDate: string;
+      expect(repo.createTask).toHaveBeenCalledWith({
+        title: "Hello",
+        note: "world",
+      });
+      expect(result).toEqual(created);
+    });
+    it("should create a task without note", async () => {
+      const created = {
+        id: 1,
+        title: "Hello",
+        completed: false,
+        dueDate: null,
       };
-
-      expect(callArguments.title).toBe("Hello");
-      expect(callArguments.note).toBe("world");
-
-      const dueDate = new Date(callArguments.dueDate!).getTime();
-      const oneDay = 24 * 60 * 60 * 1000;
-      expect(dueDate).toBeGreaterThanOrEqual(before + oneDay - 1000);
-      expect(dueDate).toBeLessThanOrEqual(after + oneDay + 1000);
+      mockCreateTask.mockResolvedValue(created);
+      await service.createTask("Hello");
+      expect(repo.createTask).toHaveBeenCalledWith({ title: "Hello" });
     });
 
     it("should throw ApiError when title is empty", async () => {
@@ -80,6 +86,30 @@ describe("taskService", () => {
       await expect(service.createTask("", "note")).rejects.toMatchObject({
         statusCode: 404,
         message: "Title is Required",
+      });
+    });
+    it("should throw ApiError when dueDate is not a string", async () => {
+      await expect(
+        service.createTask("Hello", "note", 20260930 as any),
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: "Due date must be a string in YYYY-MM-DD format",
+      });
+    });
+    it("should throw ApiError when dueDate is invalid", async () => {
+      await expect(
+        service.createTask("Hello", "note", "nfnaknfa" as any),
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: "Due date must be in YYYY-MM-DD format",
+      });
+    });
+    it("should throw ApiError when dueDate is in the past", async () => {
+      await expect(
+        service.createTask("Hello", "note", DateP as any),
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: "Due date cannot be in the past",
       });
     });
   });
@@ -179,8 +209,36 @@ describe("taskService", () => {
 
       await service.updateTask(1, { completed: undefined as any });
 
-      // completed is falsy check, so `undefined` won't pass through
       expect(repo.updateTask).toHaveBeenCalledWith(1, {});
+    });
+
+    it("should update dueDate when a valid dueDate is provided", async () => {
+      mockUpdateTask.mockResolvedValue({
+        id: 1,
+        dueDate: DateF,
+      });
+
+      await service.updateTask(1, { dueDate: DateF as any });
+
+      expect(repo.updateTask).toHaveBeenCalledWith(1, {
+        dueDate: dueDateValidation(DateF),
+      });
+    });
+    it("should throw ApiError when dueDate is invalid format", async () => {
+      await expect(
+        service.updateTask(1, { dueDate: "invalid" as any }),
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: "Due date must be in YYYY-MM-DD format",
+      });
+    });
+    it("should throw ApiError when dueDate is in the past", async () => {
+      await expect(
+        service.updateTask(1, { dueDate: DateP as any }),
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: "Due date cannot be in the past",
+      });
     });
 
     it("should throw ApiError when task does not exist", async () => {
