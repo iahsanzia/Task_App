@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "prestart": "npm run build:front",
     "start": "tsx server.ts",
     "dev:server": "tsx server.ts",
     "build:front": "tsc -p tsconfig.frontend.json",
