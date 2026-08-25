@@ -5,6 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "tsx server.ts",
     "dev:server": "tsx server.ts",
     "build:front": "tsc -p tsconfig.frontend.json",
     "watch:front": "tsc -p tsconfig.frontend.json --watch",

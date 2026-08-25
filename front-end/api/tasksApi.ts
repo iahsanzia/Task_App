@@ -1,8 +1,13 @@
 import type { Task } from "../types/taskTypes.js";
 import { fetchJSON } from "../utils/helper.js";
 
-const BASE_URL = "http://localhost:3000/tasks";
+// const BASE_URL = "http://localhost:3000/tasks";
+const isLiveServer =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "localhost");
 
+const BASE_URL = isLiveServer ? "http://localhost:3000/tasks" : "/tasks";
 export const getTasks = async (): Promise<Task[]> => {
   return fetchJSON(BASE_URL);
 };

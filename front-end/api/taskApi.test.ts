@@ -22,7 +22,7 @@ describe("tasksApi", () => {
 
       const result = await getTasks();
 
-      expect(mockFetchJSON).toHaveBeenCalledWith("http://localhost:3000/tasks");
+      expect(mockFetchJSON).toHaveBeenCalledWith("/tasks");
       expect(result).toEqual(tasks);
     });
   });
@@ -34,9 +34,7 @@ describe("tasksApi", () => {
 
       const result = await getTaskById(5);
 
-      expect(mockFetchJSON).toHaveBeenCalledWith(
-        "http://localhost:3000/tasks/5",
-      );
+      expect(mockFetchJSON).toHaveBeenCalledWith("/tasks/5");
       expect(result).toEqual(task);
     });
   });
@@ -47,13 +45,10 @@ describe("tasksApi", () => {
 
       await createTask("New", "details");
 
-      expect(mockFetchJSON).toHaveBeenCalledWith(
-        "http://localhost:3000/tasks",
-        {
-          method: "POST",
-          body: JSON.stringify({ title: "New", note: "details" }),
-        },
-      );
+      expect(mockFetchJSON).toHaveBeenCalledWith("/tasks", {
+        method: "POST",
+        body: JSON.stringify({ title: "New", note: "details" }),
+      });
     });
 
     it("should POST without note when not provided", async () => {
@@ -61,13 +56,10 @@ describe("tasksApi", () => {
 
       await createTask("No note");
 
-      expect(mockFetchJSON).toHaveBeenCalledWith(
-        "http://localhost:3000/tasks",
-        {
-          method: "POST",
-          body: JSON.stringify({ title: "No note" }),
-        },
-      );
+      expect(mockFetchJSON).toHaveBeenCalledWith("/tasks", {
+        method: "POST",
+        body: JSON.stringify({ title: "No note" }),
+      });
     });
   });
 
@@ -77,13 +69,10 @@ describe("tasksApi", () => {
 
       await updateTask(1, { completed: true });
 
-      expect(mockFetchJSON).toHaveBeenCalledWith(
-        "http://localhost:3000/tasks/1",
-        {
-          method: "PATCH",
-          body: JSON.stringify({ completed: true }),
-        },
-      );
+      expect(mockFetchJSON).toHaveBeenCalledWith("/tasks/1", {
+        method: "PATCH",
+        body: JSON.stringify({ completed: true }),
+      });
     });
   });
 
@@ -93,12 +82,9 @@ describe("tasksApi", () => {
 
       await deleteTask(3);
 
-      expect(mockFetchJSON).toHaveBeenCalledWith(
-        "http://localhost:3000/tasks/3",
-        {
-          method: "DELETE",
-        },
-      );
+      expect(mockFetchJSON).toHaveBeenCalledWith("/tasks/3", {
+        method: "DELETE",
+      });
     });
   });
 });
