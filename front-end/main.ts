@@ -19,9 +19,16 @@ const loadTasks = async () => {
   try {
     const tasks = await getTasks();
     renderTasks(tasks);
-  } catch (err: any) {
-    alert(err.message);
+  } catch (err: unknown) {
+    showError(err);
   }
+};
+const showError = (error: unknown): void => {
+  if (error instanceof Error) {
+    alert(error.message);
+    return;
+  }
+  alert("An unknown error occurred");
 };
 
 const formatDueDate = (dueDate: string | null): string => {
@@ -80,8 +87,74 @@ const promptForDate = (message: string): string | null => {
   return input.trim() === "" ? null : input.trim();
 };
 
-const renderTasks = (tasks: Task[]) => {
-  list.innerHTML = "";
+const createButton = (
+  label: string,
+  additionalClasses: string,
+  taskId: number,
+): HTMLButtonElement => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `btn btn-small ${additionalClasses}`;
+  button.dataset.id = String(taskId);
+  button.textContent = label;
+  return button;
+};
+
+const createTaskElement = (task: Task): HTMLLIElement => {
+  const li = document.createElement("li");
+  li.className = "task-item";
+
+  if (task.completed) {
+    li.classList.add("completed");
+  }
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.className = "task-checkbox";
+  checkbox.dataset.id = String(task.id);
+  checkbox.checked = task.completed;
+  checkbox.setAttribute(
+    "aria-label",
+    `Mark task "${task.title}" as ${task.completed ? "incomplete" : "complete"}`,
+  );
+
+  const content = document.createElement("div");
+  content.className = "task-content";
+
+  const title = document.createElement("div");
+  title.className = "task-title";
+  title.textContent = task.title;
+  content.appendChild(title);
+
+  if (task.dueDate) {
+    const dueDate = document.createElement("div");
+    dueDate.className = "task-due-date";
+    dueDate.textContent = `Due: ${formatDueDate(task.dueDate)}`;
+    content.appendChild(dueDate);
+  }
+
+  if (task.note) {
+    const note = document.createElement("div");
+    note.className = "task-note hidden";
+    note.id = `note-${task.id}`;
+    note.textContent = task.note;
+    content.appendChild(note);
+  }
+
+  const actions = document.createElement("div");
+  actions.className = "task-actions";
+
+  const viewButton = createButton("View", "btn-success view", task.id);
+  const editButton = createButton("Edit", "btn-primary edit", task.id);
+  const deleteButton = createButton("Delete", "btn-danger delete", task.id);
+
+  actions.append(viewButton, editButton, deleteButton);
+
+  li.append(checkbox, content, actions);
+  return li;
+};
+
+const renderTasks = (tasks: Task[]): void => {
+  list.replaceChildren();
 
   taskCount.textContent = `${tasks.length} task${tasks.length !== 1 ? "s" : ""}`;
 
@@ -91,48 +164,12 @@ const renderTasks = (tasks: Task[]) => {
   }
 
   emptyState.classList.add("hidden");
-
+  const fragment = document.createDocumentFragment();
   tasks.forEach((task) => {
-    const li = document.createElement("li");
-    li.className = `task-item ${task.completed ? "completed" : ""}`;
-
-    li.innerHTML = `
-      <input 
-        type="checkbox" 
-        class="task-checkbox" 
-        data-id="${task.id}" 
-        ${task.completed ? "checked" : ""}
-      />
-
-      <div class="task-content">
-        <div class="task-title">${task.title}</div>
-        ${
-          task.dueDate
-            ? `<div class="task-due-date">Due: ${formatDueDate(task.dueDate)}</div>`
-            : ""
-        }
-        ${
-          task.note
-            ? `<div class="task-note hidden" id="note-${task.id}">${task.note}</div>`
-            : ""
-        }
-      </div>
-
-      <div class="task-actions">
-        <button class="btn btn-small btn-success view" data-id="${task.id}">
-          View
-        </button>
-        <button class="btn btn-small btn-primary edit" data-id="${task.id}">
-          Edit
-        </button>
-        <button class="btn btn-small btn-danger delete" data-id="${task.id}">
-          Delete
-        </button>
-      </div>
-    `;
-
-    list.appendChild(li);
+    const taskElement = createTaskElement(task);
+    fragment.appendChild(taskElement);
   });
+  list.appendChild(fragment);
 };
 
 form.addEventListener("submit", async (e) => {
@@ -140,7 +177,7 @@ form.addEventListener("submit", async (e) => {
 
   const title = titleInput.value.trim();
   const note = noteInput.value.trim();
-  const dueDate = dueDateInput.value ? dueDateInput.value : null;
+  const dueDate = dueDateInput.value || null;
 
   if (!title) return;
 
@@ -151,9 +188,9 @@ form.addEventListener("submit", async (e) => {
     noteInput.value = "";
     dueDateInput.value = "";
 
-    loadTasks();
-  } catch (err: any) {
-    alert(err.message);
+    await loadTasks();
+  } catch (err: unknown) {
+    showError(err);
   }
 });
 
@@ -167,7 +204,7 @@ list.addEventListener("click", async (e) => {
     if (target.classList.contains("delete")) {
       if (confirm("Delete this task?")) {
         await deleteTask(id);
-        loadTasks();
+        await loadTasks();
       }
       return;
     }
@@ -210,10 +247,10 @@ list.addEventListener("click", async (e) => {
 
       await updateTask(id, updates);
 
-      loadTasks();
+      await loadTasks();
     }
-  } catch (err: any) {
-    alert(err.message);
+  } catch (err: unknown) {
+    showError(err);
   }
 });
 
@@ -228,11 +265,11 @@ list.addEventListener("change", async (e) => {
         completed: target.checked,
       });
 
-      loadTasks();
-    } catch (err: any) {
-      alert(err.message);
+      await loadTasks();
+    } catch (err: unknown) {
+      showError(err);
     }
   }
 });
 
-loadTasks();
+void loadTasks();
