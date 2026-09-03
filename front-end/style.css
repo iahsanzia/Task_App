@@ -238,6 +238,13 @@ body {
   word-break: break-word;
 }
 
+.task-due-date {
+  font-size: 0.8rem;
+  color: var(--primary-color);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
 .task-actions {
   display: flex;
   gap: 8px;

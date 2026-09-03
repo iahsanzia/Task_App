@@ -5,13 +5,13 @@ import { ApiError } from "../utils/ApiError.js";
 
 export const createTask = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { title, note } = req.body;
+    const { title, note, dueDate } = req.body;
 
     if (!title) {
       throw new ApiError(400, "Title is Required");
     }
 
-    const task = await taskService.createTask(title, note);
+    const task = await taskService.createTask(title, note, dueDate);
 
     res.status(201).json(task);
   },
@@ -51,11 +51,12 @@ export const updateTask = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(400, "Invalid task ID");
   }
 
-  const { title, note, completed } = req.body;
+  const { title, note, completed, dueDate } = req.body;
   const updatedTask = await taskService.updateTask(id, {
     title,
     note,
     completed,
+    dueDate,
   });
   res.json(updatedTask);
 });

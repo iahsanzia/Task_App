@@ -25,6 +25,18 @@ dist/
 build/
 *.tsbuildinfo
 
+# generated deployment packages and documentation
+taskapp-eb*.zip
+*.docx
+~$*.docx
+build_*_guide.py
+docx_render/
+ec2_docx_render/
+
+# temporary dependency and lock-file backups
+package-lock.*backup*.json
+package-lock.before-*.json
+
 # OS/editor noise
 .DS_Store
 Thumbs.db

@@ -8,5 +8,6 @@
     "outDir": "./front-end/dist",
     "skipLibCheck": true
   },
-  "include": ["front-end/**/*.ts"]
+  "include": ["front-end/**/*.ts"],
+  "exclude": ["front-end/**/*.test.ts"]
 }

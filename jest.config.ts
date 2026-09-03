@@ -7,4 +7,5 @@ export default {
   transform: {
     "^.+\\.tsx?$": ["ts-jest", { useESM: true }],
   },
+  testPathIgnorePatterns: ["/node_modules/", "<rootDir>/front-end/dist/"],
 };

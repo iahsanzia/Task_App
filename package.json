@@ -5,6 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "prestart": "npm run build:front",
+    "start": "tsx server.ts",
+    "start:container": "tsx server.ts",
     "dev:server": "tsx server.ts",
     "build:front": "tsc -p tsconfig.frontend.json",
     "watch:front": "tsc -p tsconfig.frontend.json --watch",
@@ -16,13 +19,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sequelize/sqlite3": "^7.0.0-alpha.48",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
     "sequelize": "^6.37.8",
-    "sqlite3": "^6.0.1"
+    "sqlite3": "5.1.7",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -32,8 +37,6 @@
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "supertest": "^7.2.2",
-    "ts-jest": "^29.4.12",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "ts-jest": "^29.4.12"
   }
 }
